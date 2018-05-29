@@ -46,6 +46,7 @@
 		ED685D1C20BD1EC800A7A44E /* nvpatch-macUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "nvpatch-macUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED685D2020BD1EC800A7A44E /* nvpatch_macUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nvpatch_macUITests.swift; sourceTree = "<group>"; };
 		ED685D2220BD1EC800A7A44E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		ED685D2E20BD33FF00A7A44E /* nvpatch-mac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "nvpatch-mac.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +97,7 @@
 		ED685D0120BD1EC600A7A44E /* nvpatch-mac */ = {
 			isa = PBXGroup;
 			children = (
+				ED685D2E20BD33FF00A7A44E /* nvpatch-mac.entitlements */,
 				ED685D0220BD1EC600A7A44E /* AppDelegate.swift */,
 				ED685D0420BD1EC600A7A44E /* ViewController.swift */,
 				ED685D0620BD1EC700A7A44E /* Assets.xcassets */,
@@ -192,6 +194,11 @@
 				TargetAttributes = {
 					ED685CFE20BD1EC600A7A44E = {
 						CreatedOnToolsVersion = 9.3.1;
+						SystemCapabilities = {
+							com.apple.Sandbox = {
+								enabled = 1;
+							};
+						};
 					};
 					ED685D1020BD1EC800A7A44E = {
 						CreatedOnToolsVersion = 9.3.1;
@@ -419,7 +426,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "nvpatch-mac/nvpatch_mac.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "nvpatch-mac/nvpatch-mac.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = HHP6B9KW5N;
@@ -438,7 +445,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = "nvpatch-mac/nvpatch_mac.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "nvpatch-mac/nvpatch-mac.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = HHP6B9KW5N;
