@@ -38,7 +38,6 @@ class ViewController: NSViewController {
         opendlg.canChooseFiles = true;
         opendlg.showsTagField = true;
         //opendlg.allowedFileTypes = ["avi", "mp4", "mpeg", "rmvb"];
-        //opendlg.allowedFileTypes = ["png", "jpg", "bmp", "webp"];
         
         opendlg.begin(completionHandler: { (result) -> Void in
             if result == NSApplication.ModalResponse.OK {
@@ -51,8 +50,6 @@ class ViewController: NSViewController {
     
     // cuiyu
     private func MsgLogInsert(_ msg: String){
-        //txtLog2.documentView?.insertText("hello\n");
-        //txtLog.insertText("hello cuiyu\n");
         txtLog.insertText(msg + "\n", replacementRange: NSMakeRange(0, 0));
     }
     
@@ -86,7 +83,44 @@ class ViewController: NSViewController {
         txtLog.insertText(msg, replacementRange: NSMakeRange(0, 0));
     }
     
-    let StdTag: Data = Data([ 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8 ]);
+    let StdTag_V00: Data = Data([ 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8 ]);
+    let StdTag_V01: Data = Data([ 1, 23, 56, 78, 24, 68, 70, 93, 83, 48, 63, 24, 55, 62, 77, 81 ]);
+    
+    // 执行 V01 版本第 2 步，将添加了 16 字节结尾 Tag 的文件 size/2 处的 4 字节取反
+    private func FilePatch_V01(_ f: FileHandle, _ size: UInt64){
+        f.seek(toFileOffset: size / 2);
+        var data = f.readData(ofLength: 4);
+        for i in 0..<data.count {
+            data[i] = ~data[i];
+        }
+        f.seek(toFileOffset: size / 2);
+        f.write(data);
+    }
+    
+    // V00 升级到 V01
+    private func FileUpdate_V00_V01(_ f: FileHandle, _ size: UInt64){
+        // 1. 修改结尾的 16 字节 Tag
+        f.seek(toFileOffset: size - 16);
+        f.write(StdTag_V01);
+        
+        // 2. 1/2 处 4 字节取反
+        FilePatch_V01(f, size);
+
+        f.synchronizeFile();
+    }
+    
+    // 原始文件 -> 最新版本
+    private func FilePatch(_ f: FileHandle, _ size: UInt64){
+        // 1. 追加结尾 16 字节 Tag
+        f.seekToEndOfFile();
+        f.write(StdTag_V01);
+        
+        // 2. 1/2 处 4 字节取反
+        FilePatch_V01(f, size + 16);
+
+        f.synchronizeFile();
+    }
+    
     private func FileAppend(fileurl: URL){
         txtInfo.stringValue = "正在处理文件：" + fileurl.lastPathComponent;
         let f = try? FileHandle(forUpdating: fileurl);
@@ -97,15 +131,17 @@ class ViewController: NSViewController {
         let fileSize = f?.seekToEndOfFile();
         f?.seek(toFileOffset: fileSize! - 16);
         let data = f?.readData(ofLength: 16);
-        if data == StdTag {
+        if data == StdTag_V01 {
             MsgLogInsert(fileurl.lastPathComponent + " 已经处理过！");
+        } else if data == StdTag_V00{
+            FileUpdate_V00_V01((f)!, fileSize!);
+            MsgLogInsert(fileurl.lastPathComponent + " 升级完成 V00->V01！");
         } else {
-            f?.seekToEndOfFile();
-            f?.write(StdTag);
-            f?.synchronizeFile();
-            MsgLogInsert(fileurl.lastPathComponent + " 处理完成！");
+            FilePatch((f)!, fileSize!);
+            MsgLogInsert(fileurl.lastPathComponent + " 处理完成 V01！");
         }
         f?.closeFile();
+        txtInfo.stringValue = "处理完成：" + fileurl.lastPathComponent;
     }
 
 }
